@@ -6,12 +6,7 @@
 ofxProjectorBlend::ofxProjectorBlend()
 {
 	showBlend = true;
-	//gamma = gamma2 = 0.5;
-	//blendPower = blendPower2 = 1;
-	//luminance = luminance2 = 0;
-    gamma.resize(2, 0.5);
-    blendPower.resize(2, 1);
-    luminance.resize(2, 0);
+	resizeVectors(2);
 	numProjectors = 0;
 	threshold = 0;
 }
@@ -82,11 +77,29 @@ void ofxProjectorBlend::setup(int resolutionWidth,
     blendShader.setupShaderFromSource(GL_VERTEX_SHADER, ofxProjectorBlendVertShader);
     blendShader.linkProgram();
     
-    gamma.resize(numProjectors-1, 0.5);
-    blendPower.resize(numProjectors-1, 1);
-    luminance.resize(numProjectors-1, 0);
+	resizeVectors(numProjectors-1);
 }
 
+// --------------------------------------------------
+void ofxProjectorBlend::resizeVectors(int blendingCount) {
+	gamma.clear();
+	for(int i=0; i<blendingCount; i++) {
+		ofParameter<float> temp; temp.set(0.5);
+		gamma.push_back(temp);;
+	}
+	
+    blendPower.clear();
+	for(int i=0; i<blendingCount; i++) {
+		ofParameter<float> temp; temp.set(1);
+		blendPower.push_back(temp);
+	}
+
+	luminance.clear();
+	for(int i=0; i<blendingCount; i++) {
+		ofParameter<float> temp; temp.set(0);
+		luminance.push_back(temp);
+	}
+}
 
 // --------------------------------------------------
 void ofxProjectorBlend::begin() {
@@ -162,9 +175,13 @@ void ofxProjectorBlend::updateShaderUniforms()
 	blendShader.setUniform1f("OverlapBottom", 0.0f);
 	blendShader.setUniform1f("OverlapRight", 0.0f);
 
-    blendShader.setUniform1fv("BlendPower", &blendPower[0], blendPower.size());
-    blendShader.setUniform1fv("SomeLuminanceControl", &luminance[0], luminance.size());
-    blendShader.setUniform1fv("GammaCorrection", &gamma[0], gamma.size());
+	vector<float> vBlendPower; for(int i=0; i<blendPower.size(); i++) vBlendPower.push_back(blendPower[i].get());
+	vector<float> vLuminance; for(int i=0; i<luminance.size(); i++) vLuminance.push_back(luminance[i].get());
+	vector<float> vGamma; for(int i=0; i<gamma.size(); i++) vGamma.push_back(gamma[i].get());
+
+    blendShader.setUniform1fv("BlendPower", &vBlendPower[0], vBlendPower.size());
+    blendShader.setUniform1fv("SomeLuminanceControl", &vLuminance[0], vLuminance.size());
+    blendShader.setUniform1fv("GammaCorrection", &vGamma[0], vGamma.size());
     
 	blendShader.setUniform1f("projectors", this->numProjectors);
 	blendShader.setUniform1f("threshold", threshold);

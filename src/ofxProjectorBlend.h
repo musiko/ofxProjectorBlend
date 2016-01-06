@@ -67,14 +67,15 @@ class ofxProjectorBlend
 	/** This changes your app's window size to the correct output size */
 	void setWindowToDisplaySize();
 	
-	bool showBlend;
+	ofParameter<bool>  showBlend;
 	
 	// variables that control the blend
 	// more info here on what these variables do
 	// http://local.wasp.uwa.edu.au/~pbourke/texture_colour/edgeblend/
-	vector<float> blendPower;
-	vector<float> gamma;
-	vector<float> luminance;
+	vector<ofParameter<float>> blendPower;
+	vector<ofParameter<float>> gamma;
+	vector<ofParameter<float>> luminance;
+	ofParameter<float> pixelOverlap;
 	//float blendPower2;
 	//float gamma2;
 	//float luminance2;
@@ -92,12 +93,13 @@ protected:
 	float displayWidth;
 	float displayHeight;
 	
-	float pixelOverlap;
+	
 	int numProjectors;
 	ofxProjectorBlendLayout layout;
 	ofxProjectorBlendRotation rotation;
 	ofShader blendShader;
 	ofFbo fullTexture;
 	void updateShaderUniforms();
+	void resizeVectors(int blendingCount);
 
 };
